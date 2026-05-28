@@ -1,4 +1,5 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
+# FROM nginx:alpine
 
 # Instalar dependências do sistema e extensões necessárias para o Laravel e PostgreSQL
 RUN apk add --no-cache \
@@ -34,6 +35,7 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 # Copiar o ficheiro de configuração do Nginx
 COPY nginx.conf /etc/nginx/nginx.conf
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expor a porta 80
 EXPOSE 80

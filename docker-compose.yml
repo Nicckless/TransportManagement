@@ -1,20 +1,29 @@
 services:
   frontend:
-    image: frontend
+    # image: frontend
+    build:
+      context: ./Frontend
     container_name: transport_frontend
     ports:
       - "5173:5173"
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
 
   backend:
-    image: laravel-api
+    # image: laravel-api
+    build:
+      context: ./Backend
     pull_policy: never
     container_name: transport_backend
     ports: 
       - "8000:80"
     volumes:
-      - ./backend:/var/www
+      - ./Backend:/var/www
     depends_on: 
       - db
     environment:
@@ -24,6 +33,10 @@ services:
       - DB_DATABASE=pg_db
       - DB_USERNAME=user
       - DB_PASSWORD=password
+
+  php:
+    build: ./Backend
+    command: php-fpm
   
   db:
     image: postgres:latest
