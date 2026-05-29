@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
+import { Modal } from 'bootstrap'
 import { onMounted, ref } from 'vue'
 
 interface Truck {
@@ -13,8 +14,14 @@ interface Truck {
 const trucks = ref<Truck[]>([])
 const authStore = useAuthStore()
 const toDelete = ref<Truck | null>(null)
+const newTruckInfo = ref<Truck>({
+  id: 0,
+  kilometrage: 0,
+  licence_plate: '',
+})
+const error = ref<boolean>(false)
 
-const modal = ref<HTMLElement | null>(null)
+const responseModal = ref<HTMLElement | null>(null)
 
 const getAllTrucks = () => {
   axios
@@ -36,12 +43,47 @@ const deleteTruck = (truckId: number) => {
   axios.delete('')
 }
 
+const addTruck = () => {
+  axios
+    .post(
+      'http://localhost:8000/api/registerTruck',
+      {
+        licence_plate: newTruckInfo.value?.licence_plate,
+        kilometrage: newTruckInfo.value?.kilometrage,
+      },
+      { headers: { Accept: 'application/json', 'Content-Type': 'application/json' } },
+    )
+    .then((res) => {
+      console.log(res.data)
+      newTruckInfo.value = {
+        id: 0,
+        kilometrage: 0,
+        licence_plate: '',
+      }
+      error.value = false
+      if (responseModal.value) {
+        Modal.getOrCreateInstance(responseModal.value!).show()
+      }
+
+      getAllTrucks()
+    })
+    .catch((er) => {
+      error.value = true
+      if (responseModal.value) {
+        Modal.getOrCreateInstance(responseModal.value!).show()
+      }
+    })
+}
+
 onMounted(() => {
   getAllTrucks()
 })
 </script>
 <template>
   <div class="mainbody">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTruckModal">
+      Register Truck
+    </button>
     <table class="table">
       <thead>
         <tr>
@@ -135,7 +177,63 @@ onMounted(() => {
           >
             Close
           </button>
-          <button type="button" class="btn btn-primary">Delete Truck</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+            Delete Truck
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="addTruckModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Register Truck</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="addTruck">
+            <label>Licence Plate</label>
+            <input
+              v-model="newTruckInfo.licence_plate"
+              type="text"
+              class="form-control"
+              placeholder="ex: 00-AA-00"
+            />
+            <label style="padding-top: 20px">Kilometrage</label>
+            <input
+              v-model="newTruckInfo.kilometrage"
+              type="number"
+              class="form-control"
+              value="0"
+            />
+            <div style="display: flex; justify-content: end; padding-top: 20px">
+              <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">
+                Register
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="responseModal"
+    ref="responseModal"
+    :class="!error ? 'modal-success' : 'modal-error'"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div style="display: flex; justify-content: end">
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div style="display: flex; justify-content: center">
+            {{ !error ? 'Truck was added successfully' : 'An error has occured!' }}
+          </div>
         </div>
       </div>
     </div>
@@ -145,11 +243,24 @@ onMounted(() => {
 <style scoped>
 table {
   width: 50%;
+  height: 100%;
 }
 
 .mainbody {
   display: flex;
   justify-content: center;
   margin-top: 100px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-success {
+  --bs-modal-bg: rgba(98, 238, 98, 0.815);
+  --bs-modal-border-color: green;
+}
+
+.modal-error {
+  --bs-modal-bg: rgba(238, 98, 98, 0.815);
+  --bs-modal-border-color: red;
 }
 </style>

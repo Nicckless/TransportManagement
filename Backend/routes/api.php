@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\TruckController;
 use App\Http\Controllers\UserController;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,8 @@ Route::get('/allWorkers',[UserController::class,'GetAllWorkers']);
 Route::get('/getWorker/{id}',[UserController::class,'GetWorkerById']);
 
 Route::delete('/worker/{id}',[UserController::class,'RemoveWorkerById']);
+
+Route::post('/createWorker',[UserController::class,'CreateUser']);
 
 //Truck Endpoints
 

@@ -75,7 +75,7 @@ class UserController extends Controller
 
         $worker = Worker::create([
             'name' => $credentials['name'],
-            'password' => $credentials['password'],
+            'password' => Hash::make($credentials['password']),
             'role' => $credentials['role']
         ]);
 
